@@ -1,0 +1,88 @@
+/*
+ * index.css
+ * ─────────────────────────────────────────────────────────────
+ * 전역 CSS 변수, 리셋, 애니메이션을 정의합니다.
+ * 모든 컴포넌트에서 var(--accent) 등으로 색상을 사용합니다.
+ * ─────────────────────────────────────────────────────────────
+ */
+
+/* ── 기본 리셋 */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── 디자인 토큰 (색상 · 크기) */
+:root {
+  /* 배경 계열 */
+  --bg:       #0d0f1a;   /* 앱 최하단 배경 */
+  --surface:  #13162a;   /* 헤더·하단바 배경 */
+  --card:     #1a1e35;   /* 카드 기본 배경 */
+  --card2:    #21263f;   /* 카드 hover·press 배경 */
+
+  /* 강조색 */
+  --accent:   #00c73c;   /* 네이버 그린 (주요 강조) */
+  --accent2:  #03c75a;   /* 그라디언트용 보조 그린 */
+  --yellow:   #fbbf24;   /* 속도 표시 */
+  --red:      #ff4d4d;   /* 목적지 마커 */
+
+  /* 텍스트 */
+  --text:     #e4e8f0;   /* 기본 텍스트 */
+  --muted:    #626880;   /* 보조 텍스트 */
+
+  /* 테두리 */
+  --border:   #252a45;
+
+  /* 둥글기 */
+  --radius:   16px;
+  --radiusSm: 10px;
+}
+
+/* ── html / body: 전체 높이 고정, 스크롤 방지 */
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', -apple-system, 'Segoe UI', sans-serif;
+  overflow: hidden;                    /* 지도 화면에서 바깥 스크롤 방지 */
+  -webkit-tap-highlight-color: transparent; /* 모바일 탭 하이라이트 제거 */
+}
+
+#root { height: 100%; }
+
+/* ── 스크롤바 스타일 (목적지 목록용) */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── 애니메이션 정의 */
+
+/* 아래에서 위로 등장 */
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* 서서히 나타남 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* 로딩 스피너 회전 */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* GPS 마커 녹색 빛 발산 */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 6px var(--accent); }
+  50%       { box-shadow: 0 0 20px var(--accent); }
+}
+
+/* GPS 마커 물결 퍼짐 */
+@keyframes ripple {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(2.8); opacity: 0;   }
+}
