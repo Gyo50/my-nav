@@ -1,6 +1,6 @@
 // ── API 인증 키
-const CLIENT_ID = 'yorn0kg66a'
-const SECRET_KEY = 'wGPSLkAE1q1ndCPYYzJqPypRsxETfu3YLLZfE5hj'
+const CLIENT_ID = 'kvy0ec2zgu'
+const SECRET_KEY = '5anSvaNVW2c6jpNAS56zz56otzxbOsNGfxyfbiaC'
 
 // ── 두 좌표 사이의 거리 계산 (단위: 미터)
 export function haversine(lat1, lng1, lat2, lng2) {

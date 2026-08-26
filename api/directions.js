@@ -1,25 +1,30 @@
-// api/directions.js
-// Vercel 서버리스 함수 - 네이버 Directions API 프록시
-// 브라우저 대신 서버에서 API 키를 붙여서 네이버에 요청합니다
-
 export default async function handler(req, res) {
-    // 쿼리스트링 그대로 전달 (start, goal, option 등)
-    const params = new URLSearchParams(req.query).toString()
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end()
+    }
 
-    const url = `https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving?${params}`
+    const { start, goal, option = 'trafast' } = req.query
+
+    if (!start || !goal) {
+        return res.status(400).json({ error: 'start, goal 파라미터가 필요합니다.' })
+    }
+
+    const url = `https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving?start=${start}&goal=${goal}&option=${option}`
 
     try {
         const response = await fetch(url, {
+            method: 'GET',
             headers: {
-                'X-NCP-APIGW-API-KEY-ID': 'yorn0kg66a',
-                'X-NCP-APIGW-API-KEY': 'wGPSLkAE1q1ndCPYYzJqPypRsxETfu3YLLZfE5hj',
+                'X-NCP-APIGW-API-KEY-ID': 'kvy0ec2zgu',
+                'X-NCP-APIGW-API-KEY': '5anSvaNVW2c6jpNAS56zz56otzxbOsNGfxyfbiaC',
+                'Accept': 'application/json',
             },
         })
-
         const data = await response.json()
-        res.status(response.status).json(data)
-
+        return res.status(response.status).json(data)
     } catch (e) {
-        res.status(500).json({ error: e.message })
+        return res.status(500).json({ error: e.message })
     }
 }
