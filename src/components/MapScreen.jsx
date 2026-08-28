@@ -53,37 +53,39 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
   // ────────────────────────────────────────────────────────
   //  1) 지도 초기화 (MapScreen 진입 시 최초 1회 실행)
   // ────────────────────────────────────────────────────────
-  useEffect(() => {
+ useEffect(() => {
+  // ── 네이버 SDK 로드 대기 (인증 실패 시 방어)
+  const initMap = () => {
     const naver = window.naver
-    if (!naver || mapRef.current) return  // 이미 초기화됐으면 스킵
+    if (!naver?.maps) {
+      // SDK가 아직 안 로드됐으면 500ms 후 재시도
+      setTimeout(initMap, 500)
+      return
+    }
+    if (mapRef.current) return  // 이미 초기화됐으면 스킵
 
-    // 네이버 지도 생성
     const map = new naver.maps.Map(mapElRef.current, {
-      // 초기 중심: GPS 있으면 내 위치, 없으면 서울 시청
       center: new naver.maps.LatLng(
         gps.lat ?? 37.5665,
         gps.lng ?? 126.9780
       ),
-      zoom:             16,
-      mapTypeId:        naver.maps.MapTypeId.NORMAL,
-      scaleControl:     false,   // 축척 컨트롤 숨김
-      logoControl:      true,    // 네이버 로고 표시 (필수)
-      mapDataControl:   false,   // 지도 데이터 컨트롤 숨김
-      zoomControl:      false,   // 줌 버튼 숨김 (커스텀 FAB 사용)
+      zoom: 16,
+      mapTypeId: naver.maps.MapTypeId.NORMAL,
+      scaleControl: false,
+      logoControl: true,
+      mapDataControl: false,
+      zoomControl: false,
     })
     mapRef.current = map
 
-    // 지도 드래그 시작 → 자동 추적 해제
     naver.maps.Event.addListener(map, 'dragstart', () => {
       setFollow(false)
     })
 
-    // ── 목적지 마커 생성
     const destMarker = new naver.maps.Marker({
       position: new naver.maps.LatLng(dest.lat, dest.lng),
       map,
       icon: {
-        // HTML 커스텀 마커: 핀 + 장소명 라벨
         content: `
           <div style="display:flex; flex-direction:column; align-items:center;">
             <div style="
@@ -106,28 +108,27 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
               white-space: nowrap;
             ">${dest.name}</div>
           </div>`,
-        // 마커의 기준점 (핀 뾰족한 부분)
         anchor: new naver.maps.Point(19, 57),
       },
       zIndex: 200,
     })
     destMarkerRef.current = destMarker
 
-    // ── 지도 준비 완료 후 경로 계산
     calcRoute()
+  }
 
-    // ── cleanup: MapScreen을 벗어날 때 지도 리소스 해제
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.destroy?.()
-        mapRef.current = null
-      }
-      myMarkerRef.current   = null
-      destMarkerRef.current = null
-      polylineRef.current   = null
+  initMap()  // 시작
+
+  return () => {
+    if (mapRef.current) {
+      mapRef.current.destroy?.()
+      mapRef.current = null
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])  // 마운트 1회만 실행
+    myMarkerRef.current   = null
+    destMarkerRef.current = null
+    polylineRef.current   = null
+  }
+}, [])
 
 
   // ────────────────────────────────────────────────────────
