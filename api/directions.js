@@ -1,17 +1,3 @@
-import crypto from 'crypto'
-
-// ── 환경 변수에서 키 읽기 (코드에 키 직접 X)
-const ACCESS_KEY = process.env.NCP_ACCESS_KEY
-const SECRET_KEY = process.env.NCP_SECRET_KEY
-
-function makeSignature(method, url, timestamp) {
-  const message = `${method} ${url}\n${timestamp}\n${ACCESS_KEY}`
-  return crypto
-    .createHmac('sha256', SECRET_KEY)
-    .update(message)
-    .digest('base64')
-}
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
@@ -19,28 +5,30 @@ export default async function handler(req, res) {
 
   const { start, goal, option = 'trafast' } = req.query
   if (!start || !goal) {
-    return res.status(400).json({ error: 'start, goal 파라미터가 필요합니다.' })
+    return res.status(400).json({ error: 'start, goal 파라미터 필요' })
   }
 
-  const path = `/map-direction/v1/driving?start=${start}&goal=${goal}&option=${option}`
-  const url  = `https://naveropenapi.apigw.ntruss.com${path}`
+  // ✅ VPC 환경 URL 사용
+  const url = `https://maps.apigw.ntruss.com/map-direction/v1/driving?start=${start}&goal=${goal}&option=${option}`
 
-  const timestamp = Date.now().toString()
-  const signature = makeSignature('GET', path, timestamp)
+  console.log('요청 URL:', url)
 
   try {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'x-ncp-apigw-timestamp':    timestamp,
-        'x-ncp-iam-access-key':     ACCESS_KEY,
-        'x-ncp-apigw-signature-v2': signature,
+        // ✅ mynav 앱의 Client ID / Client Secret 사용 (IAM 아님!)
+        'X-NCP-APIGW-API-KEY-ID': process.env.NCP_ACCESS_KEY,
+        'X-NCP-APIGW-API-KEY':    process.env.NCP_SECRET_KEY,
         'Accept': 'application/json',
       },
     })
+
+    console.log('네이버 응답 상태:', response.status)
     const data = await response.json()
     return res.status(response.status).json(data)
   } catch (e) {
+    console.error('에러:', e.message)
     return res.status(500).json({ error: e.message })
   }
 }
