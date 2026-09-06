@@ -9,26 +9,26 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { fetchRoute, guideIcon, fmtDist, fmtTime, etaTime, haversine } from '../utils/geo'
 
 export default function MapScreen({ dest, gps, onBack, showToast }) {
-  const mapElRef      = useRef(null)
-  const mapRef        = useRef(null)
-  const myMarkerRef   = useRef(null)
+  const mapElRef = useRef(null)
+  const mapRef = useRef(null)
+  const myMarkerRef = useRef(null)
   const destMarkerRef = useRef(null)
-  const polylineRef   = useRef(null)
+  const polylineRef = useRef(null)
 
-  const [route,      setRoute]      = useState(null)
-  const [guideIdx,   setGuideIdx]   = useState(0)
-  const [loading,    setLoading]    = useState(false)
-  const [follow,     setFollow]     = useState(true)
+  const [route, setRoute] = useState(null)
+  const [guideIdx, setGuideIdx] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [follow, setFollow] = useState(true)
   const [travelMode, setTravelMode] = useState('driving') // 교통수단 상태
 
-  const routeRef      = useRef(null)
-  const guideIdxRef   = useRef(0)
-  const followRef     = useRef(true)
+  const routeRef = useRef(null)
+  const guideIdxRef = useRef(0)
+  const followRef = useRef(true)
   const travelModeRef = useRef('driving')
 
-  useEffect(() => { routeRef.current    = route },      [route])
-  useEffect(() => { guideIdxRef.current = guideIdx },   [guideIdx])
-  useEffect(() => { followRef.current   = follow },     [follow])
+  useEffect(() => { routeRef.current = route }, [route])
+  useEffect(() => { guideIdxRef.current = guideIdx }, [guideIdx])
+  useEffect(() => { followRef.current = follow }, [follow])
   useEffect(() => { travelModeRef.current = travelMode }, [travelMode])
 
 
@@ -37,6 +37,11 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
   // ────────────────────────────────────────────────────────
   useEffect(() => {
     const initMap = () => {
+      if (!dest || !dest.lat || !dest.lng) {
+        console.error('목적지 정보 없음')
+        return
+      }
+      
       const naver = window.naver
       if (!naver?.maps) { setTimeout(initMap, 500); return }
       if (mapRef.current) return
@@ -97,7 +102,7 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
       destMarkerRef.current = null
       polylineRef.current = null
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
@@ -107,7 +112,7 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
   useEffect(() => {
     if (!mapRef.current || !gps.lat) return
     const naver = window.naver
-    const pos   = new naver.maps.LatLng(gps.lat, gps.lng)
+    const pos = new naver.maps.LatLng(gps.lat, gps.lng)
 
     if (!myMarkerRef.current) {
       myMarkerRef.current = new naver.maps.Marker({
@@ -131,10 +136,10 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
 
     // 턴-바이-턴 감지 (자동차 모드만)
     if (travelModeRef.current === 'driving') {
-      const r  = routeRef.current
+      const r = routeRef.current
       const gi = guideIdxRef.current
       if (r && gi < r.guide.length - 1) {
-        const g    = r.guide[gi]
+        const g = r.guide[gi]
         const dist = haversine(gps.lat, gps.lng, g.y, g.x)
         if (dist < 30) {
           const next = gi + 1
@@ -143,7 +148,7 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
         }
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gps])
 
 
@@ -153,13 +158,27 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
   const calcRoute = useCallback(async (mode = travelModeRef.current) => {
     if (!gps.lat) { showToast('GPS 위치를 아직 가져오지 못했습니다.'); return }
 
-    // 대중교통: 네이버 지도 웹으로 연결
-    if (mode === 'transit') {
-      const webUrl = `https://map.naver.com/v5/directions/-/${dest.lng},${dest.lat},${encodeURIComponent(dest.name)},,/transit`
-      window.open(webUrl, '_blank')
-      showToast('🚇 네이버 지도에서 대중교통 경로를 확인하세요!')
-      return
-    }
+    // ── 대중교통: 네이버 지도 웹으로 연결
+    // ── 대중교통: 네이버 지도 웹으로 연결 (출발지 + 목적지 미리 설정)
+if (mode === 'transit') {
+  if (!dest || !dest.lat || !dest.lng) {
+    showToast('목적지 정보가 없습니다.')
+    return
+  }
+  if (!gps || !gps.lat || !gps.lng) {
+    showToast('GPS 위치를 아직 가져오지 못했습니다.')
+    return
+  }
+
+  const destName = encodeURIComponent(dest.name)
+
+  // 목적지 좌표 기반 URL (출발지는 현재위치로 자동)
+  const url = `https://map.naver.com/p/directions/-/${dest.lng},${dest.lat},${destName},-,COORD/-/transit?c=11.00,0,0,0,dh`
+
+  window.open(url, '_blank')
+  showToast('🚇 네이버 지도에서 대중교통 경로를 확인하세요!')
+  return
+}
 
     setLoading(true)
     setGuideIdx(0)
@@ -168,22 +187,46 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
       let r
 
       if (mode === 'walking') {
-        // 도보: 직선거리 기반 예상
-        const dist = haversine(gps.lat, gps.lng, dest.lat, dest.lng)
-        const dur  = dist / 1.2 // 도보 평균 1.2m/s
+        const osrmUrl = `https://router.project-osrm.org/route/v1/foot/${gps.lng},${gps.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&steps=true`
+
+        const res = await fetch(osrmUrl)
+        const data = await res.json()
+
+        if (data.code !== 'Ok') throw new Error('도보 경로를 찾을 수 없습니다.')
+
+        const osrmRoute = data.routes[0]
+        const coords = osrmRoute.geometry.coordinates
+
+        // ✅ 도보 속도 보정
+        // OSRM foot 모드가 속도를 과대평가함
+        // 실제 도보 평균 속도: 약 4km/h = 1.1m/s
+        // 거리 기반으로 직접 계산
+        const dist = osrmRoute.distance                    // 미터
+        const walkingSpeed = 4 * 1000 / 3600                      // 4km/h → m/s (1.111)
+        const correctedDur = Math.round(dist / walkingSpeed)      // 보정된 소요시간 (초)
+
+        const steps = osrmRoute.legs[0].steps
+        const guide = steps.map((step, i) => ({
+          type: i === steps.length - 1 ? 16 : 1,
+          instructions: step.maneuver?.instruction || step.name || '직진',
+          distance: step.distance,
+          duration: Math.round(step.distance / walkingSpeed),  // 각 스텝도 보정
+          x: step.maneuver.location[0],
+          y: step.maneuver.location[1],
+        }))
+
         r = {
-          dist, dur,
-          tollFare: 0, fuelPrice: 0,
-          path: [[gps.lng, gps.lat], [dest.lng, dest.lat]],
-          guide: [
-            { type: 0,  instructions: '도보 출발', distance: dist, duration: dur, x: gps.lng, y: gps.lat },
-            { type: 16, instructions: '목적지 도착', distance: 0,    duration: 0,   x: dest.lng, y: dest.lat },
-          ],
+          dist,
+          dur: correctedDur,   // ✅ 보정된 시간 사용
+          tollFare: 0,
+          fuelPrice: 0,
+          path: coords,
+          guide,
           isWalking: true,
         }
-        showToast('🚶 도보 경로입니다 (직선 거리 기준)')
+        showToast('🚶 도보 경로 안내를 시작합니다!')
       } else {
-        // 자동차: Directions API
+        // ── 자동차: Directions API
         r = await fetchRoute(gps.lat, gps.lng, dest.lat, dest.lng)
         showToast('경로 안내를 시작합니다! 🚗')
       }
@@ -196,14 +239,13 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
       const path = r.path.map(([lng, lat]) => new naver.maps.LatLng(lat, lng))
 
       polylineRef.current = new naver.maps.Polyline({
-        map:           mapRef.current,
+        map: mapRef.current,
         path,
-        strokeColor:   mode === 'walking' ? '#4f8ef7' : '#00c73c',
-        strokeWeight:  6,
-        strokeOpacity: mode === 'walking' ? 0.7 : 0.9,
+        strokeColor: mode === 'walking' ? '#4f8ef7' : '#00c73c',
+        strokeWeight: 6,
+        strokeOpacity: mode === 'walking' ? 0.85 : 0.9,
         strokeLineCap: 'round',
         strokeLineJoin: 'round',
-        strokeStyle:   mode === 'walking' ? 'shortdash' : 'solid',
       })
 
       const bounds = new naver.maps.LatLngBounds()
@@ -215,14 +257,14 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
       showToast('경로 계산 실패: ' + e.message)
     }
     setLoading(false)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gps.lat, gps.lng, dest])
 
 
   // ── 현재 턴 안내 스텝
-  const curGuide   = route?.guide?.[guideIdx]
+  const curGuide = route?.guide?.[guideIdx]
   const remainDist = route ? route.guide.slice(guideIdx).reduce((a, g) => a + (g.distance ?? 0), 0) : null
-  const remainDur  = remainDist != null && route ? (remainDist / route.dist) * route.dur : null
+  const remainDur = remainDist != null && route ? (remainDist / route.dist) * route.dur : null
 
 
   // ────────────────────────────────────────────────────────
@@ -270,7 +312,7 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
       }}>
         {[
           { mode: 'driving', label: '🚗 자동차' },
-          { mode: 'walking', label: '🚶 도보'   },
+          { mode: 'walking', label: '🚶 도보' },
           { mode: 'transit', label: '🚇 대중교통' },
         ].map(({ mode, label }) => (
           <button
@@ -286,8 +328,8 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
               background: travelMode === mode
                 ? 'linear-gradient(135deg, #00c73c, #03c75a)'
                 : 'var(--card)',
-              color:      travelMode === mode ? '#fff' : 'var(--muted)',
-              fontSize:   12, fontWeight: 700, cursor: 'pointer', transition: 'all .2s',
+              color: travelMode === mode ? '#fff' : 'var(--muted)',
+              fontSize: 12, fontWeight: 700, cursor: 'pointer', transition: 'all .2s',
             }}
           >
             {label}
@@ -296,7 +338,8 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
       </div>
 
       {/* ──────────── 턴-바이-턴 안내 바 ──────────── */}
-      {curGuide && travelMode === 'driving' && (
+      {/* ──────────── 턴-바이-턴 안내 바 ──────────── */}
+      {curGuide && (travelMode === 'driving' || travelMode === 'walking') && (
         <div style={{
           background: 'var(--card)', borderBottom: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', gap: 12,
@@ -304,16 +347,18 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
         }}>
           <div style={{
             width: 46, height: 46, borderRadius: 14, flexShrink: 0,
-            background: 'linear-gradient(135deg, #00c73c, #03c75a)',
+            background: travelMode === 'walking'
+              ? 'linear-gradient(135deg, #4f8ef7, #7c5cf7)'
+              : 'linear-gradient(135deg, #00c73c, #03c75a)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
           }}>
-            {guideIcon(curGuide.type)}
+            {travelMode === 'walking' ? '🚶' : guideIcon(curGuide.type)}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.4 }}>
-              {curGuide.instructions || curGuide.name || '계속 직진'}
+              {curGuide.instructions || '계속 직진'}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--accent)', marginTop: 3 }}>
+            <div style={{ fontSize: 12, color: travelMode === 'walking' ? '#4f8ef7' : 'var(--accent)', marginTop: 3 }}>
               {fmtDist(curGuide.distance)} 후 · 남은 구간 {route.guide.length - 1 - guideIdx}개
             </div>
           </div>
@@ -403,7 +448,7 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
           background: 'var(--surface)', borderTop: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', padding: '10px 0', flexShrink: 0,
         }}>
-          <StatBox label="총 거리"   val={fmtDist(route.dist)} />
+          <StatBox label="총 거리" val={fmtDist(route.dist)} />
           <div style={{ width: 1, height: 34, background: 'var(--border)' }} />
           <StatBox label="소요 시간" val={fmtTime(route.dur)} />
           <div style={{ width: 1, height: 34, background: 'var(--border)' }} />

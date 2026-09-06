@@ -8,6 +8,7 @@ export const DESTINATIONS = [
   { id: 7, name: '부산 CS센터',   address: '부산 동구 중앙대로 502',                 lat: 35.1381046274775,  lng: 129.056866656726,  category: 'CS센터', emoji: '🏢' },
   { id: 8, name: '광주 CS센터',   address: '광주 북구 하남대로 475',                 lat: 35.1759822330209,  lng: 126.845342960459,  category: 'CS센터', emoji: '🏢' },
   { id: 9, name: '원주 CS센터',   address: '강원특별자치도 원주시 행가리1길 6',      lat: 37.32348721369851, lng: 127.91826871478203, category: 'CS센터', emoji: '🏢' },
+  { id: 10, name: '집압 CS센터',   address: '서울 금천구 시흥대로73길 11',          lat: 37.4566169360635, lng: 126.898301459536,    category: 'CS센터', emoji: '🏢' },
 ]
 
 export const CATEGORIES = ['전체', ...new Set(DESTINATIONS.map(d => d.category))]

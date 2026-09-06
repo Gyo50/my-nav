@@ -120,14 +120,14 @@ export default function App() {
       )}
 
       {/* 지도 + 네비게이션 화면 */}
-      {screen === 'map' && dest && (
-        <MapScreen
-          dest={dest}
-          gps={gps}
-          onBack={handleBack}
-          showToast={showToast}
-        />
-      )}
+      {screen === 'map' && dest && gps.lat && (
+  <MapScreen
+    dest={dest}
+    gps={gps}
+    onBack={handleBack}
+    showToast={showToast}
+  />
+)}
 
       {/* 토스트 메시지 (항상 최상단) */}
       <Toast msg={toast} />
