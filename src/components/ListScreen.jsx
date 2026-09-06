@@ -1,215 +1,218 @@
 /**
  * ListScreen.jsx
- * ─────────────────────────────────────────────────────────────
- * 첫 번째 화면: 목적지 목록 선택 화면입니다.
- *
- * 기능:
- *   - 카테고리 필터 탭
- *   - 장소명 / 주소 검색
- *   - 목적지 카드 목록
- *   - 하단 현재 GPS 좌표 표시
- *
- * Props:
- *   gps      : { lat, lng, ok } — App.jsx 에서 내려오는 GPS 상태
- *   onSelect : 목적지 선택 시 호출할 함수 (dest 객체 전달)
- * ─────────────────────────────────────────────────────────────
+ * - 센터 드롭다운 선택
+ * - 교통수단 드롭다운 선택
+ * - 길찾기 버튼 → 네이버 지도 바로 연결
  */
 import { useState } from 'react'
-import { DESTINATIONS, CATEGORIES } from '../data/destinations'
-import DestCard from './DestCard'
+import { DESTINATIONS } from '../data/destinations'
 
-export default function ListScreen({ gps, onSelect }) {
-  const [cat,   setCat]   = useState('전체')  // 선택된 카테고리
-  const [query, setQuery] = useState('')      // 검색어
+const TRAVEL_MODES = [
+  { value: 'car',     label: '🚗 자동차' },
+  { value: 'walk',    label: '🚶 도보'   },
+  { value: 'transit', label: '🚇 대중교통' },
+]
 
-  // 카테고리 + 검색어 동시 필터링
-  const filtered = DESTINATIONS.filter(d => {
-    const matchCat = cat === '전체' || d.category === cat
-    const matchQ   = d.name.includes(query) || d.address.includes(query)
-    return matchCat && matchQ
-  })
+export default function ListScreen({ gps, onInquiry }) {
+  const [selectedDest, setSelectedDest] = useState('')  // 선택된 센터 id
+  const [selectedMode, setSelectedMode] = useState('car') // 선택된 교통수단
+
+  // 선택된 목적지 객체
+  const dest = DESTINATIONS.find(d => d.id === Number(selectedDest))
+
+  // 네이버 지도 열기
+  function handleNavigate() {
+    if (!dest) { alert('센터를 선택해주세요!'); return }
+    if (!gps.ok) { alert('GPS 위치를 가져오는 중입니다. 잠시 후 다시 시도해주세요.'); return }
+
+    const destName = encodeURIComponent(dest.name)
+    const url = `https://map.naver.com/p/directions/-/${dest.lng},${dest.lat},${destName},-,COORD/-/${selectedMode}?c=11.00,0,0,0,dh`
+    window.open(url, '_blank')
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
 
-      {/* ────────────────── 상단 헤더 ────────────────── */}
+      {/* ── 상단 헤더 */}
       <div style={{
-        background:   'var(--surface)',
+        background: 'var(--surface)',
         borderBottom: '1px solid var(--border)',
-        padding:      '16px 16px 12px',
-        flexShrink:   0,
+        padding: '20px 20px 16px',
+        flexShrink: 0,
       }}>
-
-        {/* 타이틀 + GPS 상태 뱃지 */}
         <div style={{
-          display:        'flex',
-          alignItems:     'center',
-          justifyContent: 'space-between',
-          marginBottom:   14,
+          fontSize: 24, fontWeight: 900, letterSpacing: '-0.5px',
+          background: 'linear-gradient(135deg, #00c73c, #03c75a)',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          marginBottom: 4,
         }}>
-          <div>
-            <div style={{
-              fontSize:   22,
-              fontWeight: 900,
-              letterSpacing: '-0.5px',
-              // 네이버 그린 그라디언트 텍스트
-              background:           'linear-gradient(135deg, #00c73c, #03c75a)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor:  'transparent',
-            }}>
-              네비게이션
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-              어디로 갈까요?
-            </div>
-          </div>
+          CS센터 길찾기
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+          센터와 교통수단을 선택하세요
+        </div>
+      </div>
 
-          {/* GPS 연결 상태 뱃지 */}
+      {/* ── 메인 콘텐츠 */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px' }}>
+
+        {/* GPS 상태 */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          background: 'var(--card)', border: '1px solid var(--border)',
+          borderRadius: 12, padding: '10px 14px', marginBottom: 24,
+        }}>
           <div style={{
-            display:    'flex',
-            alignItems: 'center',
-            gap:        7,
-            background: 'var(--card)',
-            border:     '1px solid var(--border)',
-            borderRadius: 20,
-            padding:    '6px 12px',
-          }}>
-            {/* GPS 초록 점 (연결됐을 때 반짝임) */}
-            <div style={{
-              width:      8,
-              height:     8,
-              borderRadius: '50%',
-              background:  gps.ok ? 'var(--accent)' : 'var(--muted)',
-              boxShadow:   gps.ok ? '0 0 8px var(--accent)' : 'none',
-              animation:   gps.ok ? 'glow 2s infinite' : 'none',
-              transition:  'all .3s',
-            }} />
-            <span style={{
-              fontSize:   12,
-              color:      gps.ok ? 'var(--accent)' : 'var(--muted)',
-              fontWeight: 600,
-            }}>
-              {gps.ok ? 'GPS 연결됨' : 'GPS 대기 중'}
-            </span>
-          </div>
+            width: 8, height: 8, borderRadius: '50%',
+            background: gps.ok ? 'var(--accent)' : 'var(--muted)',
+            boxShadow: gps.ok ? '0 0 8px var(--accent)' : 'none',
+            animation: gps.ok ? 'glow 2s infinite' : 'none',
+            flexShrink: 0,
+          }} />
+          <span style={{ fontSize: 13, color: gps.ok ? 'var(--accent)' : 'var(--muted)', fontWeight: 600 }}>
+            {gps.ok
+              ? `GPS 연결됨`
+              : 'GPS 위치를 가져오는 중...'}
+          </span>
         </div>
 
-        {/* 검색창 */}
-        <div style={{
-          display:    'flex',
-          alignItems: 'center',
-          gap:        10,
-          background: 'var(--card)',
-          border:     '1.5px solid var(--border)',
-          borderRadius: 12,
-          padding:    '10px 14px',
-          marginBottom: 12,
-        }}>
-          <span style={{ fontSize: 15, flexShrink: 0 }}>🔍</span>
-          <input
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="목적지 검색..."
-            style={{
-              flex:       1,
-              background: 'none',
-              border:     'none',
-              outline:    'none',
-              color:      'var(--text)',
-              fontSize:   14,
-            }}
-          />
-          {/* 검색어 있을 때만 지우기 버튼 표시 */}
-          {query && (
-            <button
-              onClick={() => setQuery('')}
+        {/* 센터 선택 */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', marginBottom: 8 }}>
+            📍 센터 찾기
+          </div>
+          <div style={{ position: 'relative' }}>
+            <select
+              value={selectedDest}
+              onChange={e => setSelectedDest(e.target.value)}
               style={{
-                background: 'none',
-                border:     'none',
-                color:      'var(--muted)',
-                cursor:     'pointer',
-                fontSize:   15,
-                lineHeight: 1,
+                width: '100%',
+                background: 'var(--card)',
+                border: `1.5px solid ${selectedDest ? 'var(--accent)' : 'var(--border)'}`,
+                borderRadius: 14,
+                padding: '14px 44px 14px 16px',
+                color: selectedDest ? 'var(--text)' : 'var(--muted)',
+                fontSize: 15,
+                fontWeight: selectedDest ? 700 : 400,
+                outline: 'none',
+                cursor: 'pointer',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+                transition: 'border-color .2s',
               }}
             >
-              ✕
-            </button>
+              <option value="">센터를 선택하세요</option>
+              {DESTINATIONS.map(d => (
+                <option key={d.id} value={d.id}>
+                  {d.emoji} {d.name}
+                </option>
+              ))}
+            </select>
+            {/* 화살표 아이콘 */}
+            <div style={{
+              position: 'absolute', right: 14, top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'var(--muted)', fontSize: 16, pointerEvents: 'none',
+            }}>▾</div>
+          </div>
+
+          {/* 선택된 센터 주소 표시 */}
+          {dest && (
+            <div style={{
+              marginTop: 8, padding: '8px 12px',
+              background: 'rgba(0,199,60,.08)',
+              border: '1px solid rgba(0,199,60,.2)',
+              borderRadius: 10,
+              fontSize: 12, color: 'var(--accent)',
+            }}>
+              📍 {dest.address}
+            </div>
           )}
         </div>
 
-        {/* 카테고리 필터 (가로 스크롤) */}
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
-          {CATEGORIES.map(c => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              style={{
-                flexShrink:   0,
-                padding:      '6px 14px',
-                borderRadius: 20,
-                border:       '1px solid ' + (cat === c ? 'transparent' : 'var(--border)'),
-                // 선택된 카테고리만 그린 그라디언트
-                background:   cat === c
-                  ? 'linear-gradient(135deg, #00c73c, #03c75a)'
-                  : 'var(--card)',
-                color:      cat === c ? '#fff' : 'var(--muted)',
-                fontSize:   12,
-                fontWeight: 700,
-                cursor:     'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all .2s',
-              }}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ────────────────── 목적지 목록 ────────────────── */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px 20px' }}>
-        {/* 검색 결과 없을 때 */}
-        {filtered.length === 0 ? (
-          <div style={{
-            display:       'flex',
-            flexDirection: 'column',
-            alignItems:    'center',
-            paddingTop:    60,
-            color:         'var(--muted)',
-          }}>
-            <div style={{ fontSize: 44, marginBottom: 12 }}>🔍</div>
-            <div style={{ fontWeight: 600 }}>검색 결과가 없습니다</div>
-            <div style={{ fontSize: 13, marginTop: 6 }}>다른 키워드로 검색해보세요</div>
+        {/* 교통수단 선택 */}
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', marginBottom: 8 }}>
+            🚦 교통수단
           </div>
-        ) : (
-          // 목적지 카드 목록
-          filtered.map(d => (
-            <DestCard
-              key={d.id}
-              dest={d}
-              onClick={() => onSelect(d)}  // 선택 시 App.jsx 로 전달
-            />
-          ))
+          <div style={{ display: 'flex', gap: 8 }}>
+            {TRAVEL_MODES.map(({ value, label }) => (
+              <button
+                key={value}
+                onClick={() => setSelectedMode(value)}
+                style={{
+                  flex: 1, padding: '12px 0',
+                  borderRadius: 12,
+                  border: '1.5px solid ' + (selectedMode === value ? 'transparent' : 'var(--border)'),
+                  background: selectedMode === value
+                    ? 'linear-gradient(135deg, #00c73c, #03c75a)'
+                    : 'var(--card)',
+                  color: selectedMode === value ? '#fff' : 'var(--muted)',
+                  fontSize: 12, fontWeight: 700,
+                  cursor: 'pointer', transition: 'all .2s',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: 4,
+                }}
+              >
+                <span style={{ fontSize: 20 }}>
+                  {value === 'car' ? '🚗' : value === 'walk' ? '🚶' : '🚇'}
+                </span>
+                <span>{value === 'car' ? '자동차' : value === 'walk' ? '도보' : '대중교통'}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 길찾기 버튼 */}
+        <button
+          onClick={handleNavigate}
+          disabled={!dest || !gps.ok}
+          style={{
+            width: '100%', padding: '16px',
+            borderRadius: 16,
+            background: dest && gps.ok
+              ? 'linear-gradient(135deg, #00c73c, #03c75a)'
+              : 'var(--card)',
+            border: 'none',
+            color: dest && gps.ok ? '#fff' : 'var(--muted)',
+            fontSize: 16, fontWeight: 900,
+            cursor: dest && gps.ok ? 'pointer' : 'not-allowed',
+            transition: 'all .2s',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            boxShadow: dest && gps.ok ? '0 4px 20px rgba(0,199,60,.3)' : 'none',
+          }}
+        >
+          🗺 네이버 지도로 길찾기
+        </button>
+
+        {/* 안내 문구 */}
+        {(!dest || !gps.ok) && (
+          <div style={{ textAlign: 'center', marginTop: 12, fontSize: 12, color: 'var(--muted)' }}>
+            {!gps.ok ? '⏳ GPS 위치를 가져오는 중...' : '⬆️ 센터를 먼저 선택해주세요'}
+          </div>
         )}
       </div>
 
-      {/* ────────────────── 하단 GPS 좌표 표시 ────────────────── */}
+      {/* ── 하단 건의사항 버튼 */}
       <div style={{
-        background:  'var(--surface)',
-        borderTop:   '1px solid var(--border)',
-        padding:     '10px 16px',
-        flexShrink:  0,
-        display:     'flex',
-        alignItems:  'center',
-        justifyContent: 'center',
-        gap:         6,
+        background: 'var(--surface)',
+        borderTop: '1px solid var(--border)',
+        padding: '12px 20px',
+        flexShrink: 0,
       }}>
-        <span style={{ fontSize: 13 }}>📍</span>
-        <span style={{ fontSize: 12, color: 'var(--muted)' }}>
-          {gps.ok
-            ? `현재 위치: ${gps.lat?.toFixed(5)}, ${gps.lng?.toFixed(5)}`
-            : 'GPS 위치를 가져오는 중...'}
-        </span>
+        <button
+          onClick={onInquiry}
+          style={{
+            width: '100%', padding: '12px',
+            borderRadius: 12,
+            background: 'rgba(251,191,36,.08)',
+            border: '1px solid rgba(251,191,36,.25)',
+            color: '#fbbf24',
+            fontSize: 14, fontWeight: 700, cursor: 'pointer',
+          }}
+        >
+          📬 건의사항 보내기
+        </button>
       </div>
     </div>
   )
