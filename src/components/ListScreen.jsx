@@ -8,8 +8,8 @@ import { useState } from 'react'
 import { DESTINATIONS } from '../data/destinations'
 
 const TRAVEL_MODES = [
-  { value: 'car',     label: '🚗 자동차' },
-  { value: 'walk',    label: '🚶 도보'   },
+  { value: 'car', label: '🚗 자동차' },
+  { value: 'walk', label: '🚶 도보' },
   { value: 'transit', label: '🚇 대중교통' },
 ]
 
@@ -26,7 +26,12 @@ export default function ListScreen({ gps, onInquiry }) {
     if (!gps.ok) { alert('GPS 위치를 가져오는 중입니다. 잠시 후 다시 시도해주세요.'); return }
 
     const destName = encodeURIComponent(dest.name)
-    const url = `https://map.naver.com/p/directions/-/${dest.lng},${dest.lat},${destName},-,COORD/-/${selectedMode}?c=11.00,0,0,0,dh`
+    const myName = encodeURIComponent('현재위치')
+
+    // 출발지 좌표까지 포함한 URL
+    // 형식: /p/directions/{출발lng},{출발lat},{출발명},-,COORD/{목적지lng},{목적지lat},{목적지명},-,COORD/{모드}
+    const url = `https://map.naver.com/p/directions/${gps.lng},${gps.lat},${myName},-,COORD/${dest.lng},${dest.lat},${destName},-,COORD/${selectedMode}?c=11.00,0,0,0,dh`
+
     window.open(url, '_blank')
   }
 
