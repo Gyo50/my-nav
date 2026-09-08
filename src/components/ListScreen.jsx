@@ -22,17 +22,84 @@ export default function ListScreen({ gps, onInquiry }) {
 
   // 네이버 지도 열기
   function handleNavigate() {
-    if (!dest) { alert('센터를 선택해주세요!'); return }
-    if (!gps.ok) { alert('GPS 위치를 가져오는 중입니다. 잠시 후 다시 시도해주세요.'); return }
+    if (!dest) {
+      alert('센터를 선택해주세요!')
+      return
+    }
+
+    if (!gps.ok) {
+      alert('GPS 위치를 가져오는 중입니다. 잠시 후 다시 시도해주세요.')
+      return
+    }
 
     const destName = encodeURIComponent(dest.name)
-    const myName = encodeURIComponent('현재위치')
+    const startName = encodeURIComponent('내 위치')
 
-    // 출발지 좌표까지 포함한 URL
-    // 형식: /p/directions/{출발lng},{출발lat},{출발명},-,COORD/{목적지lng},{목적지lat},{목적지명},-,COORD/{모드}
-    const url = `https://map.naver.com/p/directions/${gps.lng},${gps.lat},${myName},-,COORD/${dest.lng},${dest.lat},${destName},-,COORD/${selectedMode}?c=11.00,0,0,0,dh`
+    // 네이버 지도 웹 URL
+    const webUrl =
+      `https://map.naver.com/p/directions/` +
+      `${gps.lng},${gps.lat},${startName},-,COORD/` +
+      `${dest.lng},${dest.lat},${destName},-,COORD/-/${selectedMode}` +
+      `?c=11.00,0,0,0,dh`
 
-    window.open(url, '_blank')
+    // 🚶 도보 / 🚇 대중교통
+    if (selectedMode !== 'car') {
+      window.open(webUrl, '_blank')
+      return
+    }
+
+    // 🚗 자동차
+    // 네이버 지도 앱 호출 URL
+    const appUrl =
+      `nmap://route/car` +
+      `?slat=${gps.lat}` +
+      `&slng=${gps.lng}` +
+      `&sname=${startName}` +
+      `&dlat=${dest.lat}` +
+      `&dlng=${dest.lng}` +
+      `&dname=${destName}` +
+      `&appname=CS센터길찾기`
+
+    // PC에서는 앱 URL을 사용할 필요가 없으므로 웹으로
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+
+    if (!isMobile) {
+      window.open(webUrl, '_blank')
+      return
+    }
+
+    // 모바일에서는 네이버 앱 실행 시도
+    let appOpened = false
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        appOpened = true
+        clearTimeout(fallbackTimer)
+        document.removeEventListener(
+          'visibilitychange',
+          handleVisibilityChange
+        )
+      }
+    }
+
+    document.addEventListener(
+      'visibilitychange',
+      handleVisibilityChange
+    )
+
+    const fallbackTimer = setTimeout(() => {
+      document.removeEventListener(
+        'visibilitychange',
+        handleVisibilityChange
+      )
+
+      // 앱이 열리지 않았다면 네이버 지도 웹으로 이동
+      if (!appOpened) {
+        window.location.href = webUrl
+      }
+    }, 1500)
+
+    window.location.href = appUrl
   }
 
   return (
