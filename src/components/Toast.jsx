@@ -19,16 +19,16 @@ export default function Toast({ msg }) {
       left:      '50%',
       transform: 'translateX(-50%)',         // 수평 중앙 정렬
 
-      background: 'rgba(19,22,42,0.95)',
-      border:     '1px solid var(--border)',
-      color:      'var(--text)',
+      background: 'rgba(33,33,33,0.94)',
+      border:     'none',
+      color:      '#fff',
       padding:    '11px 22px',
       borderRadius: 24,
       fontSize:   13,
       fontWeight: 600,
       zIndex:     9999,                      // 항상 최상단에 표시
       whiteSpace: 'nowrap',
-      boxShadow:  '0 8px 28px rgba(0,0,0,.6)',
+      boxShadow:  '0 8px 24px rgba(0,0,0,.18)',
       animation:  'fadeIn .25s ease',
       pointerEvents: 'none',                 // 토스트 클릭 방지 (하단 버튼 클릭 가능)
     }}>

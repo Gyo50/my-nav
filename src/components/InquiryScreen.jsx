@@ -83,7 +83,7 @@ export default function InquiryScreen({ onBack }) {
           }}
         >‹</button>
         <div>
-          <div style={{ fontSize: 16, fontWeight: 800 }}>📬 건의사항</div>
+          <div style={{ fontSize: 16, fontWeight: 800 }}>건의사항</div>
           <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 1 }}>
             더 나은 서비스를 위해 고객님의 소중한 목소리를 들려주세요.
           </div>
@@ -110,7 +110,7 @@ export default function InquiryScreen({ onBack }) {
                 marginTop: 16,
                 padding: '12px 32px',
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, #00c73c, #03c75a)',
+                background: 'var(--accentGrad)',
                 border: 'none', color: '#fff',
                 fontSize: 14, fontWeight: 700, cursor: 'pointer',
               }}
@@ -170,10 +170,10 @@ export default function InquiryScreen({ onBack }) {
             {/* 오류 메시지 */}
             {error && (
               <div style={{
-                background: 'rgba(255,77,77,.12)',
-                border: '1px solid rgba(255,77,77,.3)',
+                background: 'var(--accentSoft)',
+                border: '1px solid var(--accentLine)',
                 borderRadius: 10, padding: '10px 14px',
-                fontSize: 13, color: '#ff4d4d',
+                fontSize: 13, color: 'var(--accent)',
                 marginBottom: 16,
               }}>
                 ⚠️ {error}
@@ -190,7 +190,7 @@ export default function InquiryScreen({ onBack }) {
                 borderRadius: 14,
                 background: sending
                   ? 'var(--card)'
-                  : 'linear-gradient(135deg, #00c73c, #03c75a)',
+                  : 'var(--accentGrad)',
                 border: 'none',
                 color: sending ? 'var(--muted)' : '#fff',
                 fontSize: 15, fontWeight: 800,
@@ -209,7 +209,7 @@ export default function InquiryScreen({ onBack }) {
                   }} />
                   전송 중...
                 </>
-              ) : '📬 건의사항 보내기'}
+              ) : '건의사항 보내기'}
             </button>
           </>
         )}

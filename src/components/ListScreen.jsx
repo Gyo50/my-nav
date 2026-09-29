@@ -102,56 +102,57 @@ export default function ListScreen({ gps, onInquiry }) {
     window.location.href = appUrl
   }
 
+  const ready = dest && gps.ok
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
 
-      {/* ── 상단 헤더 */}
+      {/* ── 상단 헤더 (한일전기 브랜드) */}
       <div style={{
-        background: 'var(--surface)',
-        borderBottom: '1px solid var(--border)',
-        padding: '20px 20px 16px',
+        background: 'var(--accentGrad)',
+        color: '#fff',
+        padding: '18px 20px 22px',
         flexShrink: 0,
       }}>
-        <div style={{
-          fontSize: 24, fontWeight: 900, letterSpacing: '-0.5px',
-          background: 'linear-gradient(135deg, #00c73c, #03c75a)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          marginBottom: 4,
-        }}>
-          CS센터 길찾기
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          {/* 워드마크 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 7, background: '#fff',
+              color: 'var(--accent)', fontWeight: 900, fontSize: 17,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>H</div>
+            <span style={{ fontSize: 17, fontWeight: 900, letterSpacing: '1.5px' }}>HANIL</span>
+          </div>
+          {/* GPS 상태 */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'rgba(255,255,255,.16)', borderRadius: 20,
+            padding: '5px 10px', fontSize: 11, fontWeight: 700,
+          }}>
+            <div style={{
+              width: 7, height: 7, borderRadius: '50%',
+              background: gps.ok ? '#7dffa0' : 'rgba(255,255,255,.5)',
+              boxShadow: gps.ok ? '0 0 6px #7dffa0' : 'none',
+            }} />
+            {gps.ok ? '위치 확인됨' : '위치 확인 중'}
+          </div>
         </div>
-        <div style={{ fontSize: 13, color: 'var(--muted)' }}>
-          센터와 교통수단을 선택하세요
+        <div style={{ fontSize: 23, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 4 }}>
+          CS센터 찾기
+        </div>
+        <div style={{ fontSize: 13, opacity: .85 }}>
+          가까운 한일전기 서비스센터로 안내해 드립니다
         </div>
       </div>
 
       {/* ── 메인 콘텐츠 */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px' }}>
-
-        {/* GPS 상태 */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          background: 'var(--card)', border: '1px solid var(--border)',
-          borderRadius: 12, padding: '10px 14px', marginBottom: 24,
-        }}>
-          <div style={{
-            width: 8, height: 8, borderRadius: '50%',
-            background: gps.ok ? 'var(--accent)' : 'var(--muted)',
-            boxShadow: gps.ok ? '0 0 8px var(--accent)' : 'none',
-            animation: gps.ok ? 'glow 2s infinite' : 'none',
-            flexShrink: 0,
-          }} />
-          <span style={{ fontSize: 13, color: gps.ok ? 'var(--accent)' : 'var(--muted)', fontWeight: 600 }}>
-            {gps.ok
-              ? `GPS 연결됨`
-              : 'GPS 위치를 가져오는 중...'}
-          </span>
-        </div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 24px' }}>
 
         {/* 센터 선택 */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', marginBottom: 8 }}>
-            📍 센터 찾기
+        <div style={sectionStyle}>
+          <div style={labelStyle}>
+            <span style={stepStyle}>1</span> 서비스센터 선택
           </div>
           <div style={{ position: 'relative' }}>
             <select
@@ -159,9 +160,9 @@ export default function ListScreen({ gps, onInquiry }) {
               onChange={e => setSelectedDest(e.target.value)}
               style={{
                 width: '100%',
-                background: 'var(--card)',
+                background: 'var(--bg)',
                 border: `1.5px solid ${selectedDest ? 'var(--accent)' : 'var(--border)'}`,
-                borderRadius: 14,
+                borderRadius: 12,
                 padding: '14px 44px 14px 16px',
                 color: selectedDest ? 'var(--text)' : 'var(--muted)',
                 fontSize: 15,
@@ -171,105 +172,112 @@ export default function ListScreen({ gps, onInquiry }) {
                 appearance: 'none',
                 WebkitAppearance: 'none',
                 transition: 'border-color .2s',
+                fontFamily: 'inherit',
               }}
             >
               <option value="">센터를 선택하세요</option>
               {DESTINATIONS.map(d => (
                 <option key={d.id} value={d.id}>
-                  {d.emoji} {d.name}
+                  {d.name}
                 </option>
               ))}
             </select>
             {/* 화살표 아이콘 */}
             <div style={{
-              position: 'absolute', right: 14, top: '50%',
+              position: 'absolute', right: 16, top: '50%',
               transform: 'translateY(-50%)',
-              color: 'var(--muted)', fontSize: 16, pointerEvents: 'none',
-            }}>▾</div>
+              color: 'var(--accent)', fontSize: 12, pointerEvents: 'none',
+            }}>▼</div>
           </div>
 
           {/* 선택된 센터 주소 표시 */}
           {dest && (
             <div style={{
-              marginTop: 8, padding: '8px 12px',
-              background: 'rgba(0,199,60,.08)',
-              border: '1px solid rgba(0,199,60,.2)',
-              borderRadius: 10,
-              fontSize: 12, color: 'var(--accent)',
+              marginTop: 10, padding: '10px 12px',
+              background: 'var(--beigeSoft)',
+              borderLeft: '3px solid var(--beige)',
+              borderRadius: 8,
+              fontSize: 13, color: 'var(--charcoal)', lineHeight: 1.5,
+              animation: 'slideUp .2s ease',
             }}>
-              📍 {dest.address}
+              <div style={{ fontSize: 11, color: 'var(--beige)', fontWeight: 700, marginBottom: 2 }}>
+                센터 주소
+              </div>
+              {dest.address}
             </div>
           )}
         </div>
 
         {/* 교통수단 선택 */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', marginBottom: 8 }}>
-            🚦 교통수단
+        <div style={sectionStyle}>
+          <div style={labelStyle}>
+            <span style={stepStyle}>2</span> 이동 수단
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            {TRAVEL_MODES.map(({ value, label }) => (
-              <button
-                key={value}
-                onClick={() => setSelectedMode(value)}
-                style={{
-                  flex: 1, padding: '12px 0',
-                  borderRadius: 12,
-                  border: '1.5px solid ' + (selectedMode === value ? 'transparent' : 'var(--border)'),
-                  background: selectedMode === value
-                    ? 'linear-gradient(135deg, #00c73c, #03c75a)'
-                    : 'var(--card)',
-                  color: selectedMode === value ? '#fff' : 'var(--muted)',
-                  fontSize: 12, fontWeight: 700,
-                  cursor: 'pointer', transition: 'all .2s',
-                  display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', gap: 4,
-                }}
-              >
-                <span style={{ fontSize: 20 }}>
-                  {value === 'car' ? '🚗' : value === 'walk' ? '🚶' : '🚇'}
-                </span>
-                <span>{value === 'car' ? '자동차' : value === 'walk' ? '도보' : '대중교통'}</span>
-              </button>
-            ))}
+            {TRAVEL_MODES.map(({ value }) => {
+              const on = selectedMode === value
+              return (
+                <button
+                  key={value}
+                  onClick={() => setSelectedMode(value)}
+                  style={{
+                    flex: 1, padding: '12px 0',
+                    borderRadius: 12,
+                    border: '1.5px solid ' + (on ? 'var(--accent)' : 'var(--border)'),
+                    background: on ? 'var(--accentSoft)' : 'var(--surface)',
+                    color: on ? 'var(--accent)' : 'var(--muted)',
+                    fontSize: 12, fontWeight: 700,
+                    cursor: 'pointer', transition: 'all .2s',
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', gap: 4,
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  <span style={{ fontSize: 20, filter: on ? 'none' : 'grayscale(1)', opacity: on ? 1 : .6 }}>
+                    {value === 'car' ? '🚗' : value === 'walk' ? '🚶' : '🚇'}
+                  </span>
+                  <span>{value === 'car' ? '자동차' : value === 'walk' ? '도보' : '대중교통'}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
         {/* 길찾기 버튼 */}
         <button
           onClick={handleNavigate}
-          disabled={!dest || !gps.ok}
+          disabled={!ready}
           style={{
             width: '100%', padding: '16px',
-            borderRadius: 16,
-            background: dest && gps.ok
-              ? 'linear-gradient(135deg, #00c73c, #03c75a)'
-              : 'var(--card)',
+            borderRadius: 14,
+            background: ready ? 'var(--accentGrad)' : '#e3ded6',
             border: 'none',
-            color: dest && gps.ok ? '#fff' : 'var(--muted)',
-            fontSize: 16, fontWeight: 900,
-            cursor: dest && gps.ok ? 'pointer' : 'not-allowed',
+            color: ready ? '#fff' : 'var(--muted)',
+            fontSize: 16, fontWeight: 800,
+            cursor: ready ? 'pointer' : 'not-allowed',
             transition: 'all .2s',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            boxShadow: dest && gps.ok ? '0 4px 20px rgba(0,199,60,.3)' : 'none',
+            boxShadow: ready ? '0 6px 18px rgba(230,0,18,.28)' : 'none',
+            fontFamily: 'inherit',
           }}
         >
-          🗺 네이버 지도로 길찾기
+          길찾기 시작
         </button>
 
         {/* 안내 문구 */}
-        {(!dest || !gps.ok) && (
-          <div style={{ textAlign: 'center', marginTop: 12, fontSize: 12, color: 'var(--muted)' }}>
-            {!gps.ok ? '⏳ GPS 위치를 가져오는 중...' : '⬆️ 센터를 먼저 선택해주세요'}
-          </div>
-        )}
+        <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'var(--muted)' }}>
+          {!gps.ok
+            ? '현재 위치를 확인하고 있습니다...'
+            : !dest
+              ? '서비스센터를 먼저 선택해주세요'
+              : '네이버 지도로 경로를 안내합니다'}
+        </div>
       </div>
 
       {/* ── 하단 건의사항 버튼 */}
       <div style={{
         background: 'var(--surface)',
         borderTop: '1px solid var(--border)',
-        padding: '12px 20px',
+        padding: '12px 16px',
         flexShrink: 0,
       }}>
         <button
@@ -277,15 +285,38 @@ export default function ListScreen({ gps, onInquiry }) {
           style={{
             width: '100%', padding: '12px',
             borderRadius: 12,
-            background: 'rgba(251,191,36,.08)',
-            border: '1px solid rgba(251,191,36,.25)',
-            color: '#fbbf24',
+            background: 'var(--surface)',
+            border: '1px solid var(--charcoal)',
+            color: 'var(--charcoal)',
             fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            fontFamily: 'inherit',
           }}
         >
-          📬 건의사항 보내기
+          고객 건의사항 보내기
         </button>
       </div>
     </div>
   )
+}
+
+// ── 공통 스타일
+const sectionStyle = {
+  background: 'var(--surface)',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius)',
+  padding: '16px',
+  marginBottom: 12,
+  boxShadow: '0 1px 3px rgba(0,0,0,.04)',
+}
+
+const labelStyle = {
+  display: 'flex', alignItems: 'center', gap: 8,
+  fontSize: 14, fontWeight: 800, color: 'var(--text)', marginBottom: 12,
+}
+
+const stepStyle = {
+  width: 20, height: 20, borderRadius: '50%',
+  background: 'var(--accent)', color: '#fff',
+  fontSize: 11, fontWeight: 800,
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 }

@@ -1,10 +1,10 @@
 {
-    "name": "실시간 네비게이션",
-    "short_name": "네비게이션",
-    "description": "네이버 지도 기반 실시간 길 안내 앱",
+    "name": "한일전기 CS센터 찾기",
+    "short_name": "한일 CS센터",
+    "description": "한일전기 서비스센터 길 안내",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0d0f1a",
-    "theme_color": "#00c73c",
+    "background_color": "#f6f4f1",
+    "theme_color": "#e60012",
     "orientation": "portrait"
 }

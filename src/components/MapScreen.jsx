@@ -48,15 +48,15 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
           content: `
             <div style="display:flex;flex-direction:column;align-items:center;">
               <div style="
-                background:linear-gradient(135deg,#ff4d4d,#ff7070);
+                background:linear-gradient(135deg,#e60012,#c4000f);
                 border:2.5px solid #fff;border-radius:50% 50% 50% 0;
                 width:38px;height:38px;display:flex;align-items:center;
                 justify-content:center;font-size:18px;
-                box-shadow:0 4px 14px rgba(255,77,77,.5);transform:rotate(-45deg);">
+                box-shadow:0 4px 14px rgba(230,0,18,.4);transform:rotate(-45deg);">
                 <span style="transform:rotate(45deg)">${dest.emoji}</span>
               </div>
               <div style="
-                background:rgba(13,15,26,.9);color:#fff;font-size:11px;
+                background:rgba(33,33,33,.92);color:#fff;font-size:11px;
                 font-weight:700;padding:3px 9px;border-radius:8px;margin-top:5px;
                 border:1px solid rgba(255,255,255,.15);white-space:nowrap;">
                 ${dest.name}
@@ -110,11 +110,11 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
             <div style="position:relative;width:32px;height:32px;
               display:flex;align-items:center;justify-content:center;">
               <div style="position:absolute;width:32px;height:32px;
-                border-radius:50%;background:rgba(0,199,60,.25);
+                border-radius:50%;background:rgba(230,0,18,.2);
                 animation:ripple 1.8s ease-out infinite;"></div>
               <div style="width:16px;height:16px;border-radius:50%;
-                background:#00c73c;border:2.5px solid #fff;
-                box-shadow:0 0 12px rgba(0,199,60,.8);
+                background:#e60012;border:2.5px solid #fff;
+                box-shadow:0 0 12px rgba(230,0,18,.6);
                 position:relative;z-index:1;"></div>
             </div>`,
           anchor: new naver.maps.Point(16, 16),
@@ -211,7 +211,7 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
                 flex: 1, padding: '8px 0', borderRadius: 10,
                 border: '1px solid ' + (travelMode === mode ? 'transparent' : 'var(--border)'),
                 background: travelMode === mode
-                  ? 'linear-gradient(135deg, #00c73c, #03c75a)'
+                  ? 'var(--accentGrad)'
                   : 'var(--card)',
                 color: travelMode === mode ? '#fff' : 'var(--muted)',
                 fontSize: 12, fontWeight: 700, cursor: 'pointer', transition: 'all .2s',
@@ -228,7 +228,7 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
           style={{
             width: '100%', padding: '13px',
             borderRadius: 12,
-            background: 'linear-gradient(135deg, #00c73c, #03c75a)',
+            background: 'var(--accentGrad)',
             border: 'none', color: '#fff',
             fontSize: 15, fontWeight: 800, cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -258,7 +258,7 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
               width: 46, height: 46, borderRadius: '50%',
               background: follow ? 'var(--accent)' : 'var(--card)',
               border: '1px solid ' + (follow ? 'var(--accent)' : 'var(--border)'),
-              fontSize: 19, cursor: 'pointer', boxShadow: '0 4px 16px rgba(0,0,0,.5)',
+              fontSize: 19, cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,.15)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s',
             }}
           >📍</button>
@@ -270,7 +270,7 @@ export default function MapScreen({ dest, gps, onBack, showToast }) {
             position: 'absolute', left: 14, bottom: 16, zIndex: 50,
             background: 'var(--card)', border: '1.5px solid var(--border)',
             borderRadius: 14, padding: '8px 16px', textAlign: 'center',
-            boxShadow: '0 4px 16px rgba(0,0,0,.4)',
+            boxShadow: '0 4px 14px rgba(0,0,0,.12)',
           }}>
             <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--yellow)', lineHeight: 1 }}>
               {gps.speed ?? 0}

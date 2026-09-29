@@ -93,8 +93,8 @@ export default function DestCard({ dest, onClick }) {
           fontSize:   11,
           fontWeight: 700,
           color:      'var(--accent)',
-          background: 'rgba(0,199,60,.12)',
-          border:     '1px solid rgba(0,199,60,.25)',
+          background: 'var(--accentSoft)',
+          border:     '1px solid var(--accentLine)',
           borderRadius: 6,
           padding:    '2px 8px',
         }}>

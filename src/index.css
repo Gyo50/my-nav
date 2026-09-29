@@ -13,29 +13,35 @@
   padding: 0;
 }
 
-/* ── 디자인 토큰 (색상 · 크기) */
+/* ── 디자인 토큰 (색상 · 크기) — 한일전기 브랜드 테마 */
 :root {
-  /* 배경 계열 */
-  --bg:       #0d0f1a;   /* 앱 최하단 배경 */
-  --surface:  #13162a;   /* 헤더·하단바 배경 */
-  --card:     #1a1e35;   /* 카드 기본 배경 */
-  --card2:    #21263f;   /* 카드 hover·press 배경 */
+  /* 배경 계열 (밝은 톤) */
+  --bg:       #f6f4f1;   /* 앱 최하단 배경 (웜 그레이) */
+  --surface:  #ffffff;   /* 헤더·하단바 배경 */
+  --card:     #ffffff;   /* 카드 기본 배경 */
+  --card2:    #f1ede7;   /* 카드 hover·press 배경 */
 
   /* 강조색 */
-  --accent:   #00c73c;   /* 네이버 그린 (주요 강조) */
-  --accent2:  #03c75a;   /* 그라디언트용 보조 그린 */
-  --yellow:   #fbbf24;   /* 속도 표시 */
-  --red:      #ff4d4d;   /* 목적지 마커 */
+  --accent:     #e60012;  /* 한일 레드 (주요 강조) */
+  --accent2:    #c4000f;  /* 그라디언트·눌림용 진한 레드 */
+  --accentSoft: rgba(230,0,18,.07);
+  --accentLine: rgba(230,0,18,.22);
+  --accentGrad: linear-gradient(135deg, #e60012, #c4000f);
+  --beige:      #ac9e8a;  /* 한일 웜 베이지 (보조) */
+  --beigeSoft:  rgba(172,158,138,.14);
+  --charcoal:   #363636;  /* 한일 차콜 */
+  --yellow:   #d48a00;   /* 속도 표시 */
+  --red:      #e60012;   /* 목적지 마커 */
 
   /* 텍스트 */
-  --text:     #e4e8f0;   /* 기본 텍스트 */
-  --muted:    #626880;   /* 보조 텍스트 */
+  --text:     #212121;   /* 기본 텍스트 */
+  --muted:    #8a847c;   /* 보조 텍스트 */
 
   /* 테두리 */
-  --border:   #252a45;
+  --border:   #e3ded6;
 
   /* 둥글기 */
-  --radius:   16px;
+  --radius:   14px;
   --radiusSm: 10px;
 }
 
@@ -44,7 +50,7 @@ html, body {
   height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Noto Sans KR', -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Pretendard', 'Noto Sans KR', -apple-system, 'Segoe UI', sans-serif;
   overflow: hidden;                    /* 지도 화면에서 바깥 스크롤 방지 */
   -webkit-tap-highlight-color: transparent; /* 모바일 탭 하이라이트 제거 */
 }
