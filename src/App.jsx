@@ -3,14 +3,12 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import ListScreen    from './components/ListScreen'
-import MapScreen     from './components/MapScreen'
 import InquiryScreen from './components/InquiryScreen'
 import Toast         from './components/Toast'
 
 export default function App() {
-  // 현재 화면: 'list' | 'map' | 'inquiry'
+  // 현재 화면: 'list' | 'inquiry'
   const [screen, setScreen] = useState('list')
-  const [dest,   setDest]   = useState(null)
   const [gps,    setGps]    = useState({
     lat: null, lng: null, speed: 0, ok: false,
   })
@@ -47,16 +45,6 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast(null), dur)
   }
 
-  function handleSelect(d) {
-    setDest(d)
-    setScreen('map')
-  }
-
-  function handleBack() {
-    setScreen('list')
-    setDest(null)
-  }
-
   return (
     <div style={{
       width: '100%', height: '100vh', background: 'var(--bg)',
@@ -68,16 +56,6 @@ export default function App() {
         <ListScreen
           gps={gps}
           onInquiry={() => setScreen('inquiry')}
-        />
-      )}
-
-      {/* 지도 + 네비게이션 화면 */}
-      {screen === 'map' && dest && gps.lat && (
-        <MapScreen
-          dest={dest}
-          gps={gps}
-          onBack={handleBack}
-          showToast={showToast}
         />
       )}
 

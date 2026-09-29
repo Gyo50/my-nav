@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nav-app-v3'
+const CACHE_NAME = 'nav-app-v4'
 const CORE_ASSETS = ['/', '/index.html']
 
 self.addEventListener('install', (event) => {
@@ -22,12 +22,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url)
 
-  // API / 외부 요청은 캐시 안 함
-  if (
-    url.hostname.includes('naver') ||
-    url.hostname.includes('ntruss') ||
-    url.pathname.startsWith('/api/')
-  ) {
+  // 외부 요청은 캐시 안 함
+  if (url.origin !== self.location.origin) {
     return
   }
 
